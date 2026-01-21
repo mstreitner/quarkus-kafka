@@ -27,13 +27,11 @@ public class PublishResource {
                     .build();
         }
 
-        String key = java.util.UUID.randomUUID().toString();
+        var key = java.util.UUID.randomUUID().toString();
         inputProducer.publish(key, value);
-
         return Response.ok(new PublishResponse(key, value)).build();
     }
 
     public record PublishResponse(String key, String value) {
     }
 }
-

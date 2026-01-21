@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "InputEvent",
+  "namespace": "at.cloudflight.kafkaexample.avro",
+  "doc": "Input message published to example-input-v1.",
+  "fields": [
+    {"name": "id", "type": "string", "doc": "UUID key used as Kafka record key"},
+    {"name": "value", "type": "string", "doc": "Original value"},
+    {"name": "createdAtEpochMillis", "type": "long", "doc": "Producer-side timestamp"}
+  ]
+}
+

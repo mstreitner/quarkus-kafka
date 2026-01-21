@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "OutputEvent",
+  "namespace": "at.cloudflight.kafkaexample.avro",
+  "doc": "Output message published to example-output-v1.",
+  "fields": [
+    {"name": "id", "type": "string", "doc": "Same id as input"},
+    {"name": "originalValue", "type": "string"},
+    {"name": "transformedValue", "type": "string"},
+    {"name": "processedAtEpochMillis", "type": "long"}
+  ]
+}
+
