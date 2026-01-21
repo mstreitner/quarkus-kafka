@@ -1,0 +1,20 @@
+# Test profile config.
+# We set up in-memory channels for unit tests (no Kafka needed).
+mp:
+  messaging:
+    incoming:
+      example-input:
+        connector: smallrye-in-memory
+      example-output:
+        connector: smallrye-in-memory
+    outgoing:
+      example-input:
+        connector: smallrye-in-memory
+      example-output:
+        connector: smallrye-in-memory
+
+# Disable dev services in tests (keeps tests fast and avoids container startup)
+quarkus:
+  devservices:
+    enabled: false
+

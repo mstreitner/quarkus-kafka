@@ -1,0 +1,36 @@
+quarkus:
+  application:
+    name: kafka-example
+  http:
+    port: 9090
+
+# Local dev defaults for the Podman stack in docker-compose.yml
+# - from host: localhost:29092
+# - from within a container: kafka:9092
+
+mp:
+  messaging:
+    incoming:
+      example-input:
+        connector: smallrye-kafka
+        topic: example-input-v1
+        value:
+          deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    outgoing:
+      example-input-producer:
+        connector: smallrye-kafka
+        topic: example-input-v1
+        value:
+          serializer: org.apache.kafka.common.serialization.StringSerializer
+      example-output:
+        connector: smallrye-kafka
+        topic: example-output-v1
+        value:
+          serializer: org.apache.kafka.common.serialization.StringSerializer
+
+
+# Use the external listener when running Quarkus on your host
+kafka:
+  bootstrap:
+    servers: localhost:29092
+
