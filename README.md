@@ -1,17 +1,17 @@
 # kafka-example
 
-A Quarkus application demonstrating Kafka messaging integration.
+A small Quarkus + Kafka playground that lets you run a local Kafka stack via Podman and push messages through a simple pipeline.
 
 ## Local infrastructure (Podman)
 
-This repo ships a small local stack:
+This repo ships a local stack defined in `docker-compose.yml`:
 
-- Kafka (KRaft, no ZooKeeper)
-- Kafka Connect (REST on `:8083`)
+- Kafka (KRaft mode, no ZooKeeper)
+- Kafka Connect (REST API on `:8083`)
 - Kafbat UI (web UI on `:8080`)
-- Keycloak (OIDC, web UI on `:8081`)
-- Apicurio Registry (HTTP API on `:8082`, backed by Postgres)
+- Apicurio Registry (HTTP API/UI on `:8082`, backed by Postgres)
 - Postgres (for Apicurio storage, on `:5432`)
+- A one-shot init container that creates the demo topics
 
 ### Start
 
@@ -27,65 +27,65 @@ podman-compose down
 
 ### URLs
 
-- Kafka (internal): `kafka:9092`
+- Kafka (internal / containers): `kafka:9092`
 - Kafka (from your laptop/tools): `localhost:29092`
+- Quarkus Backend REST: http://localhost:9090
 - Kafka Connect REST: http://localhost:8083
 - Kafbat UI: http://localhost:8080
-- Keycloak: http://localhost:8081
-  - admin user: `admin` / `admin`
-  - imported realm: `kafka-example`
 - Apicurio Registry:
   - UI/API base: http://localhost:8082
   - v3 API base: http://localhost:8082/apis/registry/v3
+  - Confluent-compatible API (used by Kafbat UI): http://localhost:8082/apis/ccompat/v7
 - Postgres (optional access): `localhost:5432` (db/user/pass: `registry`)
 
-### OAuth note (Strimzi OAuth)
+## Topics
 
-Keycloak is included so you can use it as an OIDC provider for Strimzi OAuth.
+The compose stack auto-creates these topics on startup:
 
-The provided compose file **does not yet enable OAuth on Kafka/Kafka Connect** because the commonly used Strimzi OAuth login module isn’t bundled with the Confluent Kafka/Connect images by default.
+- `example-input-v1`
+- `example-output-v1`
 
-If you want, I can:
+## Quarkus application flow
 
-1. add a custom Kafka/Connect image that includes the Strimzi OAuth login JAR,
-2. switch Kafka listeners to SASL/OAUTHBEARER,
-3. configure Kafka Connect to authenticate via OAuth.
+The app demonstrates a minimal end-to-end flow:
 
-## Running the application in dev mode
+1. The REST endpoint publishes to the *input* topic.
+2. `InputConsumer` consumes, transforms the payload, then publishes to the *output* topic.
+3. (Optional) You can observe output via Kafka tooling / UI.
 
-You can run your application in dev mode that enables live coding using:
+## Running the application
 
-```shell script
+Dev mode:
+
+```shell
 ./mvnw quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+## Publish a message via HTTP
 
-## Packaging and running the application
+Call the endpoint with a `value` query param.
 
-The application can be packaged using:
-
-```shell script
-./mvnw package
-```
-
-Then run:
+- It will generate a random UUID as Kafka record key
+- It will publish the query param string as the record value
 
 ```shell
+curl "http://localhost:8080/publish?value=hello"
+```
+
+Expected response:
+
+```json
+{"key":"<uuid>","value":"hello"}
+```
+
+## Packaging and running
+
+```shell
+./mvnw package
 java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-You can then execute your native executable with: `./target/kafka-example-1.0.0-SNAPSHOT-runner`
-
 ## Related Guides
 
-- [Apache Kafka Client](https://quarkus.io/guides/kafka): Connect to Apache Kafka with its native API
-- [Messaging - Kafka Connector](https://quarkus.io/guides/kafka-getting-started): Connect to Kafka with Reactive Messaging
+- [Apache Kafka Client](https://quarkus.io/guides/kafka)
+- [Messaging - Kafka Connector](https://quarkus.io/guides/kafka-getting-started)
